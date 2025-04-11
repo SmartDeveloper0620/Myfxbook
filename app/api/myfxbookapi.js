@@ -35,13 +35,11 @@ export async function getAccount(params) {
 
 //Logout from Myfxbook
 export async function logoutApi(params) {
-	console.log("----params---", params.sessionID)
 	try {
 		const response = await fetch(
 			`${BASE_URL}/logout.json?session=${params.sessionID}`
 		);
 		const data = await response.json();
-		console.log("----data---", data)
 		if (data.error) {
 			throw new Error(data.message || "Failed to logout from myfxbook1");
 		}

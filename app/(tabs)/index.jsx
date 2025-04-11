@@ -5,16 +5,19 @@ import { getAccount, getOpenTradesApi, logoutApi } from '../api/myfxbookapi';
 import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from '../components/Toast';
 
 export default function Index() {
   const [sessionId, setSessionId] = useState("");
   const [accountData, setAccountData] = useState({
     balance: 0,
     equity: 0,
-    profit: 0
+    profit: 0,
+    name: ''
   });
   const [openTradesData, setOpenTradesData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const checkSession = async () => {
     try {
@@ -23,6 +26,7 @@ export default function Index() {
       if (!sessionID) {
         router.replace('(auth)/login');
       } else {
+        setShowToast(true);
         const sessionData = {
           sessionID: sessionID
         }
@@ -34,7 +38,8 @@ export default function Index() {
           setAccountData({
             balance: account.balance,
             equity: account.equity,
-            profit: account.profit
+            profit: account.profit,
+            name: account.name
           });
 
           const reqData = {
@@ -73,6 +78,13 @@ export default function Index() {
 
   useEffect(() => {
     checkSession();
+
+    // Set up periodic session checks every minute
+    const sessionCheckInterval = setInterval(checkSession, 60000);
+
+    return () => {
+      clearInterval(sessionCheckInterval);
+    };
   }, [])
 
   if (!loading) {
@@ -85,6 +97,11 @@ export default function Index() {
 
   return (
     <ScrollView style={styles.container}>
+      <Toast
+        message={`Welcome! ${accountData.name}`}
+        visible={showToast}
+        onHide={() => setShowToast(false)}
+      />
       <View style={styles.header}>
         {/* <TouchableOpacity style={styles.menuButton}>
           <Ionicons name="menu" size={24} color="black" />
