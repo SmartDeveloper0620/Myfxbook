@@ -30,7 +30,6 @@ export default function Closed() {
           }
           try {
             const responseClosedTrades = await getClosedTradesApi(reqData);
-            console.log("responseClosedTrades", responseClosedTrades);
             if (responseClosedTrades.error) {
               console.log('error->', responseClosedTrades.message);
             } else {

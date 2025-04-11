@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,13 @@ import {
 import { router } from 'expo-router';
 import { loginApi } from '../api/myfxbookapi';
 import { setSessionID } from '../utils/sessionControl';
+import Toast from '../components/Toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const handleLogin = async () => {
     if (loading) return;
@@ -35,10 +37,11 @@ export default function Login() {
         // Store the session ID
         await setSessionID(response.session);
 
-        alert("Login Successfully");
+        // setShowToast(true);
         // Navigate to home screen using router
         router.replace('/(tabs)');
       } else {
+        Alert.alert("You have too many login attempts. Please try again later or log in via website.");
         throw new Error('Invalid response from server like this -> ', response.message);
       }
     } catch (error) {
@@ -48,12 +51,21 @@ export default function Login() {
     }
   };
 
+  useEffect(() => {
+    setShowToast(true);
+  }, []);
+
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
       style={styles.container}
       resizeMode="cover"
     >
+      <Toast
+        message="Please login to continue"
+        visible={showToast}
+        onHide={() => setShowToast(false)}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}

@@ -14,15 +14,21 @@ export default function RootLayout() {
         router.replace('(auth)/login');
       }
     } catch (error) {
-      console.error('Session check error:', error);
+      // console.error('Session check error');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-
     checkSession();
+
+    // Set up periodic session checks every minute
+    const sessionCheckInterval = setInterval(checkSession, 60000);
+
+    return () => {
+      clearInterval(sessionCheckInterval);
+    };
   }, []);
 
   if (isLoading) {
