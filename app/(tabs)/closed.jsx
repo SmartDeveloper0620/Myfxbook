@@ -59,10 +59,24 @@ export default function Closed() {
     );
   }
 
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
-  };
+  // const formatDate = (timestamp) => {
+  //   try {
+  //     // If timestamp is in milliseconds, create date directly
+  //     // If timestamp is in seconds, multiply by 1000
+  //     const date = new Date(typeof timestamp === 'number' ? timestamp * 1000 : timestamp);
+
+  //     // Check if date is valid
+  //     if (isNaN(date.getTime())) {
+  //       console.log('Invalid timestamp:', timestamp);
+  //       return 'Invalid date';
+  //     }
+
+  //     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+  //   } catch (error) {
+  //     console.log('Error formatting date:', error, 'timestamp:', timestamp);
+  //     return 'Invalid date';
+  //   }
+  // };
 
   return (
     <ScrollView style={styles.container}>
@@ -82,29 +96,32 @@ export default function Closed() {
       </View>
 
       <View style={styles.tradesList}>
-        {closedTrades.map((trade, index) => (
-          <View key={index} style={styles.tradeItem}>
-            <View style={styles.tradeMain}>
-              <View style={styles.tradeHeader}>
-                <View style={styles.symbolContainer}>
-                  <Text style={styles.symbolText}>{trade.symbol}, </Text>
-                  <Text style={trade.action.toLowerCase() === 'buy' ? styles.buyText : styles.sellText}>
-                    {trade.action.toLowerCase()} {trade.sizing.value}
+        {closedTrades.map((trade, index) => {
+          // Temporary logging to debug timestamp
+          return (
+            <View key={index} style={styles.tradeItem}>
+              <View style={styles.tradeMain}>
+                <View style={styles.tradeHeader}>
+                  <View style={styles.symbolContainer}>
+                    <Text style={styles.symbolText}>{trade.symbol}, </Text>
+                    <Text style={trade.action.toLowerCase() === 'buy' ? styles.buyText : styles.sellText}>
+                      {trade.action.toLowerCase()} {trade.sizing.value}
+                    </Text>
+                  </View>
+                  <Text style={styles.timestamp}>{trade.closeTime}</Text>
+                </View>
+                <View style={styles.priceContainer}>
+                  <Text style={styles.priceText}>
+                    {trade.openPrice} → {trade.closePrice}
+                  </Text>
+                  <Text style={[styles.profitText, trade.profit < 0 ? styles.negative : styles.positive]}>
+                    {trade.profit.toFixed(2)}
                   </Text>
                 </View>
-                <Text style={styles.timestamp}>{formatDate(trade.closeTime)}</Text>
-              </View>
-              <View style={styles.priceContainer}>
-                <Text style={styles.priceText}>
-                  {trade.openPrice} → {trade.closePrice}
-                </Text>
-                <Text style={[styles.profitText, trade.profit < 0 ? styles.negative : styles.positive]}>
-                  {trade.profit.toFixed(2)}
-                </Text>
               </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </ScrollView>
   );

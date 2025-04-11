@@ -24,11 +24,11 @@ export default function RootLayout() {
     checkSession();
 
     // Set up periodic session checks every minute
-    const sessionCheckInterval = setInterval(checkSession, 60000);
+    // const sessionCheckInterval = setInterval(checkSession, 60000);
 
-    return () => {
-      clearInterval(sessionCheckInterval);
-    };
+    // return () => {
+    //   clearInterval(sessionCheckInterval);
+    // };
   }, []);
 
   if (isLoading) {
