@@ -13,3 +13,12 @@ export function replace(url, params) {
 		navigationRef.dispatch(StackActions.replace(url, params));
 	}
 }
+
+// Create a default export object with all the navigation functions
+const navigationUtils = {
+	navigationRef,
+	navigate,
+	replace
+};
+
+export default navigationUtils;
