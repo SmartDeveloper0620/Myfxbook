@@ -7,10 +7,10 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from '../components/Toast';
 import io from "socket.io-client";
-import { BACKEND_URL } from '@env';
-const ENDPOINT = BACKEND_URL;
-console.log(ENDPOINT);
-const socket = io(ENDPOINT, {
+// import { BACKEND_URL } from '@env';
+// const ENDPOINT = BACKEND_URL;
+// console.log(ENDPOINT);
+const socket = io("http://54.93.117.48:5000/", {
   transports: ['websocket', 'polling'],
   reconnection: true,
   reconnectionAttempts: 5,
@@ -20,7 +20,7 @@ const socket = io(ENDPOINT, {
 
 // Add connection event listeners
 socket.on('connect', () => {
-  console.log('Socket connected successfully to:', ENDPOINT);
+  console.log('Socket connected successfully to:', "http://54.93.117.48:5000/");
 });
 
 socket.on('connect_error', (error) => {
