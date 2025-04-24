@@ -6,6 +6,36 @@ import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from '../components/Toast';
+import io from "socket.io-client";
+// import { BACKEND_URL } from '@env';
+// const ENDPOINT = BACKEND_URL;
+// console.log(ENDPOINT);
+const socket = io("http://54.93.117.48:5000/", {
+  transports: ['websocket', 'polling'],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  timeout: 10000
+});
+
+// Add connection event listeners
+socket.on('connect', () => {
+  console.log('Socket connected successfully to:', "http://54.93.117.48:5000/");
+});
+
+socket.on('connect_error', (error) => {
+  console.error('Socket connection error:', error.message);
+  // You can show a toast or alert to the user here
+  Alert.alert(
+    "Connection Error",
+    "Could not connect to the server. Please check your internet connection and try again.",
+    [{ text: "OK" }]
+  );
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Socket disconnected:', reason);
+});
 
 export default function Index() {
   const [sessionId, setSessionId] = useState("");
@@ -18,7 +48,9 @@ export default function Index() {
   const [openTradesData, setOpenTradesData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
-
+  const [balance, setBalance] = useState("");
+  const [equity,setEquity] = useState("");
+  const [profit,setProfit] = useState("");
   const checkSession = async () => {
     try {
       const sessionID = await getSessionID();
@@ -46,16 +78,33 @@ export default function Index() {
             sessionID: sessionID,
             userId: account.id
           }
-          try {
-            const responseOpenTrades = await getOpenTradesApi(reqData);
-            if (responseOpenTrades.error) {
-              console.log('error->', responseOpenTrades.message);
-            } else {
-              setOpenTradesData(responseOpenTrades.openTrades || []);
+          console.log(account.id)
+          socket.emit("join")
+          socket.on('sendTrades', (trades,balance,equity) => {
+            const copy_trades = Array.from(trades);
+            setProfit(copy_trades.at(-1).profit);
+            if(trades&&trades.length)
+            {
+              trades.pop();
+              // console.log(trades);
+              // console.log(balance,equity);
+              setBalance(balance);
+              setEquity(equity);
+              setOpenTradesData(trades);
+
             }
-          } catch (error) {
-            console.log("Error fetching open trades:", error);
-          }
+          });
+          // try {
+          //   const responseOpenTrades = await getOpenTradesApi(reqData);
+          //   if (responseOpenTrades.error) {
+          //     console.log('error->', responseOpenTrades.message);
+          //   } else {
+          //     setOpenTradesData(responseOpenTrades.openTrades || []);
+          //     console.log(responseOpenTrades)
+          //   }
+          // } catch (error) {
+          //   console.log("Error fetching open trades:", error);
+          // }
         }
       }
     } catch (errors) {
@@ -75,15 +124,12 @@ export default function Index() {
       console.log("Logout error:", error);
     }
   }
-
   useEffect(() => {
     checkSession();
 
-    // Set up periodic session checks every minute
-    const sessionCheckInterval = setInterval(checkSession, 60000);
 
     return () => {
-      clearInterval(sessionCheckInterval);
+      socket.off("sendTrades");
     };
   }, [])
 
@@ -118,17 +164,17 @@ export default function Index() {
       </View>
 
       <View style={styles.profitLoss}>
-        <Text style={styles.profitLossText}>{accountData.profit.toFixed(2)} USD</Text>
+        <Text style={styles.profitLossText}>{profit} USD</Text>
       </View>
 
       <View style={styles.accountInfo}>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Balance:</Text>
-          <Text style={styles.infoValue}>{accountData.balance.toFixed(2)}</Text>
+          <Text style={styles.infoValue}>{balance}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Equity:</Text>
-          <Text style={styles.infoValue}>{accountData.equity.toFixed(2)}</Text>
+          <Text style={styles.infoValue}>{equity}</Text>
         </View>
       </View>
       <View style={styles.positionsSection}>
@@ -136,17 +182,17 @@ export default function Index() {
           <Text style={styles.positionsTitle}>Positions</Text>
           <Text style={styles.positionsTotal}>Total: {openTradesData.length}</Text>
         </View>
-        {openTradesData.map((trade, index) => (
+        {openTradesData.map((trade, index) => ( 
           <View key={index} style={styles.positionItem}>
             <View style={styles.positionLeft}>
               <View style={styles.symbolContainer}>
                 <Text style={styles.symbolText}>{trade.symbol}, </Text>
-                <Text style={trade.action.toLowerCase() === 'buy' ? styles.buyText : styles.sellText}>{trade.action.toLowerCase()} {trade.sizing.value}</Text>
+                <Text style={trade.action.toLowerCase() === 'Buy' ? styles.buyText : styles.sellText}>{trade.action.toLowerCase()} {trade.lots}</Text>
               </View>
               <Text style={styles.priceText}>{trade.openPrice} → {trade.pips}</Text>
             </View>
             <Text style={[styles.profitText, trade.profit < 0 ? styles.negative : styles.positive]}>
-              {trade.profit.toFixed(2)}
+              {parseFloat(trade.profit).toFixed(2)}
             </Text>
           </View>
         ))}

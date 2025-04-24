@@ -46,4 +46,14 @@ const clearSessionID = async () => {
   }
 }
 
+// Named exports
 export { setSessionID, getSessionID, clearSessionID };
+
+// Default export
+const sessionControl = {
+  setSessionID,
+  getSessionID,
+  clearSessionID
+};
+
+export default sessionControl;

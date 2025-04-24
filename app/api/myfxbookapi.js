@@ -82,3 +82,14 @@ export async function getClosedTradesApi(params) {
 		throw new Error("Failed to fetch closed trades");
 	}
 }
+
+// Create a default export object with all the API functions
+const myfxbookApi = {
+	loginApi,
+	getAccount,
+	logoutApi,
+	getOpenTradesApi,
+	getClosedTradesApi
+};
+
+export default myfxbookApi;
